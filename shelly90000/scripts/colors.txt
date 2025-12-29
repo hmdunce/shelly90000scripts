@@ -1,0 +1,8 @@
+l green
+M lime
+J yellow
+F orange
+D red
+T purple
+P blue
+N cyan

@@ -1,0 +1,32 @@
+ls
+kernel.level_bypass { level:"LOWSEC", timeout:15 }
+ns
+kernel.level_bypass { level:"NULLSEC", timeout:7 }
+hl
+kernel.hardline
+dc
+kernel.hardline{dc:true}
+b
+accts.balance
+scrape
+shelly90000.scrape{t:[#s.skimmerite.public,#s.empty_nest.public,#s.kill_bio.public]}
+ms
+kernel.level_bypass { level:"MIDSEC", timeout:30 }
+hs
+kernel.level_bypass { level:"HIGHSEC", timeout:60 }
+fs
+kernel.level_bypass { level:"FULLSEC" }
+wipe
+shelly90000.hack{wipe:1}
+u
+scripts.user
+locs
+locs{spec:"jr",scriptors:1}
+ups
+sys.upgrades
+specs
+sys.specs
+al
+scripts.get_access_level {{ name:"{0}" }}
+l
+scripts.get_level {{ name:"{0}" }}

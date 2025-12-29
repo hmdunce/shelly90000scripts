@@ -1,0 +1,29 @@
+# Notes
+
+## How hack those mofos?
+
+### Goals
+
+- resumable; state in db
+- detect rotations and other changes (e.g. loc replaced by scam script)
+- record data about lock stack etc
+- WANT MULTIPLE HACKERS TO COLLABORATE ON CURRENT ROTATION ???
+  - ideally hackers should divide the work?
+  - else they each use random order?
+  - or is this stupid? hacking easy, binmat harder?
+  - let's try it even if it's stupid
+
+### Thoughts
+
+Given current data, we have certain expectations.
+
+If I do X, I expect to see Y, or Z... unless W!
+
+- given it's a loc, PUBLIC HIDDEN and no shifting
+- given we're hacking that mofo, "Connected to mofo" on poke
+- given first lock is c001, when I call with {}, I should see LOCK_ERROR about c001
+  (hmm)
+- given rot is [c001{color:"orange"}, EZ_40{ez_cmd:"open",ez_prime:2}, c002]
+  - if I call with {}, should see LOCK_ERROR about c001
+  - if I call with {c001:"orange",color_digit:6}, should see
+    LOCK_UNLOCKED c001 plus LOCK_ERROR about EZ_40
