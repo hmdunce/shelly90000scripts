@@ -17,7 +17,7 @@ kernel.level_bypass { level:"HIGHSEC", timeout:60 }
 fs
 kernel.level_bypass { level:"FULLSEC" }
 wipe
-shelly90000.hack{wipe:1}
+shelly90000.wipe
 u
 scripts.user
 locs
@@ -30,3 +30,5 @@ al
 scripts.get_access_level {{ name:"{0}" }}
 l
 scripts.get_level {{ name:"{0}" }}
+yesreally
+shelly90000.wipe{confirm:true}

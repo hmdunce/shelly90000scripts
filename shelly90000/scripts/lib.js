@@ -164,7 +164,19 @@ function (context, args) {
           clone_args = args => _CLONE(typeof args == "object" && args || {}),
           loc_id = name => `loc|${name}`,
           hours_ago = h =>
-            new Date(Date.now() - (1000 * 60 * 60 * h));
+            new Date(Date.now() - (1000 * 60 * 60 * h)),
+          parse_lock_error = output => {
+            for (let i = 0; i < output.length; i++) {
+              if (output.slice(i).startsWith("`NLOCK_UNLOCKED` ")) {
+                
+              }
+            }
+            let m;
+            if (m = /^(?:`NLOCK_UNLOCKED` ([^\n]+)\n)*`VLOCK_ERROR`\n(.*)$/.exec(output)) {
+              return m.slice(1);
+            }
+            return "nope";
+          };
       let lib = {
           get,
           notOk,
@@ -185,6 +197,7 @@ function (context, args) {
           clone_args,
           loc_id,
           hours_ago,
+          parse_lock_error,
       };
       #G.lib = DEEP_FREEZE(lib);
     }

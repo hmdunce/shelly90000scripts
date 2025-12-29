@@ -27,3 +27,11 @@ If I do X, I expect to see Y, or Z... unless W!
   - if I call with {}, should see LOCK_ERROR about c001
   - if I call with {c001:"orange",color_digit:6}, should see
     LOCK_UNLOCKED c001 plus LOCK_ERROR about EZ_40
+
+How to handle db state? Idea: Just log calls! Then write code to process log.
+
+// [NOTICE] trying to hack that mofo anon_ddttl_2we3k1.entry_7e6j9l
+// [INFO] Connected to anon_ddttl_2we3k1.entry_7e6j9l
+// [NOTICE] hacked? «VLOCK_ERROR«
+// Denied access by CORE «Nc001« lock.
+// [ERROR] still don't know how to hack mofos

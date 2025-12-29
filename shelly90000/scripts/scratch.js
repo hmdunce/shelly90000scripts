@@ -1,7 +1,6 @@
 function (context, args) {
-  let {hours_ago} = #fs.shelly90000.lib();
-  return [
-    new Date(),
-    hours_ago(1000),
-  ]
+  let {parse_lock_error} = #fs.shelly90000.lib();
+  return parse_lock_error(
+    "`NLOCK_UNLOCKED` c001\n`NLOCK_UNLOCKED` EZ_21\n`VLOCK_ERROR`\nlol what whoops"
+  )
 }
