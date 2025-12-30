@@ -1,6 +1,9 @@
 function (context, args) {
+//@{"hreq":":::TRUST COMMUNICATION::: hardline required - activate with kernel.hardline","mofoDoneGotHacked":""WARNING: BINMAT security shell inactive. Intelligent defense system offline.\n`NLOCK_UNLOCKED`\nConnection terminated."}@
     if (!#G.lib) {
-      let get = (o,k) => {
+      let scripts_lib = #fs.scripts.lib(),
+          cst = JSON.parse(#fs.scripts.quine().split`@`[1]),
+          get = (o,k) => {
             let d = Object.getOwnPropertyDescriptor(o, k);
             return d && d.value;
           },
@@ -14,6 +17,7 @@ function (context, args) {
           },
           colorSev = sev => `\`${sevColors[sev]}${sev}\``,
           log = (severity, ...args) => {
+            // TODO hummmmmmmmmmmmmmmm
             let message = args.map(x => typeof x == "string" ? x : JSON.stringify(x)).join("\n");
             #db.i({
               type: "log",
@@ -94,7 +98,9 @@ function (context, args) {
           cutLines = (lines, cols=context.cols) => {
             return lines.map(line => cutLine(line, cols));
           },
-          escapeBacktick = s => s.replaceAll("`", "\xAB"),
+          escape = s => s.replaceAll("`", "\xAB"),
+          pr = x => escape(JSON.stringify(x)),
+          ppr = x => escape(JSON.stringify(x, null, null, '  ')),
           freqs = xs => {
             let fs = {};
             for (let x of xs) fs[x] = 1 + (fs[x] || 0);
@@ -165,26 +171,54 @@ function (context, args) {
           loc_id = name => `loc|${name}`,
           hours_ago = h =>
             new Date(Date.now() - (1000 * 60 * 60 * h)),
-          parse_lock_error = output => {
+          parse_lock_error = mofo => {
             let lock_unlocked = "`NLOCK_UNLOCKED`",
-                lock_error = "`VLOCK_ERROR`";
-            function parseThatMofo(mofo) {
-              let unlocked = [], error;
-              for (let i = 0; i < mofo.length;) {
-                  if (mofo.slice(i).startsWith(lock_unlocked)) {
-                      unlocked.push(mofo.slice(i, mofo.indexOf("\n", i)));
-                      i += (mofo.indexOf("\n", i) - i + 1);
-                  } else if (mofo.slice(i).startsWith(lock_error)) {
-                      error = mofo.slice(i);
-                      return {unlocked, error}
-                  } else {
-                      throw `dunno? ${JSON.stringify(mofo.slice(i))}`
-                  }
+                lock_error = "`VLOCK_ERROR`",
+                unlocked = [], error;
+            for (let i = 0; i < mofo.length;) {
+              if (mofo.slice(i).startsWith(lock_unlocked)) {
+                unlocked.push(mofo.slice(i, mofo.indexOf("\n", i)));
+                i += (mofo.indexOf("\n", i) - i + 1);
+              } else if (mofo.slice(i).startsWith(lock_error)) {
+                error = mofo.slice(i + lock_error.length + 1);
+                return {unlocked, error}
+              } else if (mofo == cst.hreq) {
+                return {ok: false, msg: mofo} // ya dumb, do we even need this?
+              } else if (/^Connected to [A-Za-z0-9_]+\.[A-Za-z0-9_]+$/.test(mofo)) {
+                return {poked :true} // do we even need this?
+              } else if (mofo == cst.mofoDoneGotHacked) { 
+                return {hacked: true};
+              } else {
+                  throw `dunno? ${JSON.stringify(mofo.slice(i)).replaceAll("`", "\xAB")}`
               }
-              // does this ever happen?
-              throw `wow ${JSON.stringify({unlocked})}`
             }
+            // does this ever happen?
+            throw `wow ${pr({unlocked})}`
+          },
+          parse_lock_error_lock = call => {
+            let {output, args} = call,
+                {error} = parse_lock_error(call.output);
+            throw `plel ${pr({output,args,error})}`
+          },
+          parse_calls = calls => {
+            // filter calls to last hour
+            // because older calls are surely irrelevant ?
+            calls = calls.filter(x => x.time >= hours_ago(1));
+            // sort recent first
+            calls.sort((x,y) => _NUM_SORT_DESC(x.time, y.time));
 
+            for (let call of calls) {
+              let le;
+              if (le = parse_lock_error(call.output)) {
+                let lel;
+                if (lel = parse_lock_error_lock(call)) {
+                  throw `LEL ${pr(lel)}`
+                }
+              } else {
+                throw `dunno? ${pr(call.output)}`
+              }
+            }
+            return "stuff";
           };
       let lib = {
           get,
@@ -195,7 +229,9 @@ function (context, args) {
           renderLine,
           cutLine,
           cutLines,
-          escapeBacktick,
+          escape,
+          pr,
+          ppr,
           freqs,
           freqsMap,
           parts,
@@ -206,7 +242,8 @@ function (context, args) {
           clone_args,
           loc_id,
           hours_ago,
-          parse_lock_error,
+          parse_lock_error_lock, // TODO delete
+          parse_calls,
       };
       #G.lib = DEEP_FREEZE(lib);
     }

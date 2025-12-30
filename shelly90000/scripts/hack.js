@@ -4,7 +4,7 @@ function (context, args) {
   let _id = context.this_script;
   if (args.wipe) return #db.r({_id});
 
-  let {notOk, log, tail, escapeBacktick} = #fs.shelly90000.lib();
+  let {notOk, log, tail, escape} = #fs.shelly90000.lib();
 
   let {c} = JSON.parse(#fs.scripts.quine().split`@`[1]);
   c = Object.values(c);
@@ -20,22 +20,7 @@ function (context, args) {
     // hmm
     if (args.show) {
       let doc = #db.f({_id: `loc|${name}`}).first();
-      function stringly(f,x) {
-        if (typeof x == "string") {
-          return f(x);
-        } else if (typeof x == "object" && Array.isArray(x)) {
-          return x.map(f);
-        } else {
-          return x;
-        }
-      }
-      return doc.calls.map(call => {
-        let escape = x => x.replaceAll("`", "\xAB");
-        let {parse_lock_error} = #fs.shelly90000.lib();
-        call.test = escape(parse_lock_error(call.output));
-        call.output = stringly(escape, call.output);
-        return call;
-      })
+      return doc.calls;
     }
 
     if (notOk(l)) {
@@ -57,9 +42,10 @@ function (context, args) {
     if (!(l === 4)) { // ?
       throw "TODO not fullsec?"
     }
-    if (!(al.public && al.hidden)) return {ok: false, msg: "that not a mofo?"}
+    if (!(al.public && al.hidden))
+      return {ok: false, msg: "that not a mofo?"}
     // hack that mofo
-    let {loc_id, hours_ago} = #fs.shelly90000.lib(),
+    let {loc_id, hours_ago, parse_calls} = #fs.shelly90000.lib(),
         _id = loc_id(name),
         {caller} = context;
 
@@ -71,7 +57,7 @@ function (context, args) {
           calls = {
             args, output,
             time, caller,
-            // run_id: _RUN_ID,
+            run_id: _RUN_ID,
           };
       if (context.calling_script) calls.calling_script = calling_script;
       #db.us({_id}, {$push: {calls}});
@@ -85,6 +71,15 @@ function (context, args) {
       return out;
     } else {
       log("NOTICE", "trying to auto hack, lol");
+
+      let doc = #db.f({_id}).first(),
+          calls = doc.calls || [];
+
+      return [
+        "WIP",
+        parse_calls(calls),
+      ];
+
       let out = call(),
           m; // regex match
       if (out == `Connected to ${name}`) {
@@ -94,11 +89,11 @@ function (context, args) {
           let lock = m[1];
           log("NOTICE", `denied access by lock ${lock}`);
         }
-        log("NOTICE", `hacked? ${escapeBacktick(out)}`);
+        log("NOTICE", `hacked? ${escape(out)}`);
         log("ERROR", "still don't know how to hack mofos");
       } else {
         // TODO curloc etc?
-        log("ERROR", `WHAT? ${name} gave ${escapeBacktick(out)} for noarg`);
+        log("ERROR", `WHAT? ${name} gave ${escape(out)} for noarg`);
       }
     }
   }

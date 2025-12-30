@@ -42,7 +42,15 @@ If I do X, I expect to see Y, or Z... unless W!
 
 How to handle db state?
 
-Idea: Just log calls! Then write code to process log.
+Idea: Just log calls! Then write code to process log...
+
+Problem: need to understand outputs like
+
+```
+"LOCK_ERROR\n"lime" is not the correct color name."
+```
+
+
 
 ### Junk
 
@@ -51,3 +59,7 @@ Idea: Just log calls! Then write code to process log.
 // [NOTICE] hacked? «VLOCK_ERROR«
 // Denied access by CORE «Nc001« lock.
 // [ERROR] still don't know how to hack mofos
+
+
+mofo done got hacked:
+"WARNING: BINMAT security shell inactive. Intelligent defense system offline.\n`NLOCK_UNLOCKED`\nConnection terminated."
