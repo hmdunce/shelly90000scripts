@@ -166,16 +166,25 @@ function (context, args) {
           hours_ago = h =>
             new Date(Date.now() - (1000 * 60 * 60 * h)),
           parse_lock_error = output => {
-            for (let i = 0; i < output.length; i++) {
-              if (output.slice(i).startsWith("`NLOCK_UNLOCKED` ")) {
-                
+            let lock_unlocked = "`NLOCK_UNLOCKED`",
+                lock_error = "`VLOCK_ERROR`";
+            function parseThatMofo(mofo) {
+              let unlocked = [], error;
+              for (let i = 0; i < mofo.length;) {
+                  if (mofo.slice(i).startsWith(lock_unlocked)) {
+                      unlocked.push(mofo.slice(i, mofo.indexOf("\n", i)));
+                      i += (mofo.indexOf("\n", i) - i + 1);
+                  } else if (mofo.slice(i).startsWith(lock_error)) {
+                      error = mofo.slice(i);
+                      return {unlocked, error}
+                  } else {
+                      throw `dunno? ${JSON.stringify(mofo.slice(i))}`
+                  }
               }
+              // does this ever happen?
+              throw `wow ${JSON.stringify({unlocked})}`
             }
-            let m;
-            if (m = /^(?:`NLOCK_UNLOCKED` ([^\n]+)\n)*`VLOCK_ERROR`\n(.*)$/.exec(output)) {
-              return m.slice(1);
-            }
-            return "nope";
+
           };
       let lib = {
           get,
