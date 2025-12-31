@@ -1,5 +1,9 @@
 # shelly90000scripts
 
+## IMPORTANT NOTICE
+
+https://www.youtube.com/watch?v=ot7PZ17outc
+
 ## BronzeMUD rules
 
 - hackmud from scratch (ish)

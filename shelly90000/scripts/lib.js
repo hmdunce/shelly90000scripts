@@ -169,8 +169,6 @@ function (context, args) {
           is_cli = context => !is_sus(context),
           clone_args = args => _CLONE(typeof args == "object" && args || {}),
           loc_id = name => `loc|${name}`,
-          hours_ago = h =>
-            new Date(Date.now() - (1000 * 60 * 60 * h)),
           parse_lock_error = mofo => {
             let lock_unlocked = "`NLOCK_UNLOCKED`",
                 lock_error = "`VLOCK_ERROR`",
@@ -193,33 +191,27 @@ function (context, args) {
               }
             }
             // does this ever happen?
-            throw `wow ${pr({unlocked})}`
+            throw `wowowow ${pr({unlocked})}`
           },
-          parse_lock_error_lock = call => {
-            let {output, args} = call,
-                {error} = parse_lock_error(call.output);
-            throw `plel ${pr({output,args,error})}`
-          },
-          parse_calls = calls => {
-            // filter calls to last hour
-            // because older calls are surely irrelevant ?
-            calls = calls.filter(x => x.time >= hours_ago(1));
-            // sort recent first
-            calls.sort((x,y) => _NUM_SORT_DESC(x.time, y.time));
-
-            for (let call of calls) {
-              let le;
-              if (le = parse_lock_error(call.output)) {
-                let lel;
-                if (lel = parse_lock_error_lock(call)) {
-                  throw `LEL ${pr(lel)}`
-                }
-              } else {
-                throw `dunno? ${pr(call.output)}`
-              }
+          cap = (s,i) => {
+            switch (i) {
+              case 0:
+                return s.toLowerCase();
+              case 1:
+                return s.toUpperCase();
+              case 2:
+                return s[0].toUpperCase() + s.slice(1).toLowerCase();
             }
-            return "stuff";
-          };
+          },
+          uncap = s => {
+            if (s == s.toLowerCase()) {
+              return 0;
+            } else if (s == s.toUpperCase()) {
+              return 1;
+            } else {
+              return 2
+            }
+          }
       let lib = {
           get,
           notOk,
@@ -241,9 +233,7 @@ function (context, args) {
           is_cli,
           clone_args,
           loc_id,
-          hours_ago,
-          parse_lock_error_lock, // TODO delete
-          parse_calls,
+          parse_lock_error,
       };
       #G.lib = DEEP_FREEZE(lib);
     }

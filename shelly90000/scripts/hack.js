@@ -1,11 +1,7 @@
 function (context, args) {
 //@{"c":{"l":"green","M":"lime","J":"yellow","F":"orange","D":"red","T":"purple","P":"blue","N":"cyan"}}@
   args = _CLONE(typeof args == "object" && args || {});
-  let _id = context.this_script;
-  if (args.wipe) return #db.r({_id});
-
   let {notOk, log, tail, escape} = #fs.shelly90000.lib();
-
   let {c} = JSON.parse(#fs.scripts.quine().split`@`[1]);
   c = Object.values(c);
   
@@ -16,13 +12,15 @@ function (context, args) {
     let {name, call} = t,
         l = #fs.scripts.get_level({name}),
         al = #fs.scripts.get_access_level({name});
-
+  
     // hmm
     if (args.show) {
-      let doc = #db.f({_id: `loc|${name}`}).first();
-      return doc.calls;
+      let doc = #db.f({_id: `loc|${name}`}).first(),
+          {ppr} = #fs.shelly90000.lib();
+      // TODO continue with further targets
+      return ppr(doc.calls);
     }
-
+  
     if (notOk(l)) {
       if (l.msg == `Script ${name} doesn't exist.`) {
         log("NOTICE", `${name} no longer exists`);
@@ -40,23 +38,22 @@ function (context, args) {
       }
     }
     if (!(l === 4)) { // ?
-      throw "TODO not fullsec?"
+      throw "TODO not fullsec"
     }
     if (!(al.public && al.hidden))
       return {ok: false, msg: "that not a mofo?"}
-    // hack that mofo
-    let {loc_id, hours_ago, parse_calls} = #fs.shelly90000.lib(),
-        _id = loc_id(name),
-        {caller} = context;
 
     // auto-log calls
-    let actualCall = call;
+    let {loc_id} = #fs.shelly90000.lib(),
+        _id = loc_id(name),
+        actualCall = call;
     call = args => {
       let time = new Date(),
           output = actualCall(args),
           calls = {
             args, output,
-            time, caller,
+            time,
+            caller: context.caller,
             run_id: _RUN_ID,
           };
       if (context.calling_script) calls.calling_script = calling_script;
@@ -64,38 +61,59 @@ function (context, args) {
       return output;
     };
 
-    // manual hacking lol
-    if ('a' in args) {
-      log("INFO", "manual hacking lol");
-      let out = call(args.a);
-      return out;
-    } else {
-      log("NOTICE", "trying to auto hack, lol");
+    // hack that mofo?
+    let s = null,
+        log = [],
+        a = () => {
+          if (s == null) return null;
+          return Object.fromEntries(
+            Object.entries(s).map(([k, v]) => {
+              switch (k) {
+                case "c001":
+                  return [k, c[v]];
+                default:
+                  throw `uhoh ${k}`
+              }
+            }));
+        },
+        {ppr, parse_lock_error} = #fs.shelly90000.lib();
 
-      let doc = #db.f({_id}).first(),
-          calls = doc.calls || [];
-
-      return [
-        "WIP",
-        parse_calls(calls),
-      ];
-
-      let out = call(),
-          m; // regex match
-      if (out == `Connected to ${name}`) {
-        out = call({});
-        // TODO will break on second lock?
-        if (m = /^`VLOCK_ERROR`\nDenied access by (?:.* )?`N([^`]+)` lock.$/.exec(out)) {
-          let lock = m[1];
-          log("NOTICE", `denied access by lock ${lock}`);
-        }
-        log("NOTICE", `hacked? ${escape(out)}`);
-        log("ERROR", "still don't know how to hack mofos");
+    while (_END - Date.now() > 1000) {
+      let aa = a(),
+          out = call(aa),
+          m;
+      log.push({args: aa, out});
+      if (out == ":::TRUST COMMUNICATION::: hardline required - activate with kernel.hardline") {
+        return {ok: false, msg: "need hardline stupid"}
+      } else if (out == `Connected to ${name}`) {
+        s = {};
+        continue;
       } else {
-        // TODO curloc etc?
-        log("ERROR", `WHAT? ${name} gave ${escape(out)} for noarg`);
+        let {unlocked, error} = parse_lock_error(out);
+        log.push({unlocked, error});
+        if (error) {
+          if (m = /^Denied access by (?:.* )?`N([^`]+)` lock\.$/.exec(error)) {
+            let lock = m[1];
+            switch (lock) {
+              case "c001":
+                s = {c001: 0}
+                log.push("detected c001 lock, trying colors");
+                continue;
+                break;
+              default:
+                log.push(`denied access by unknown lock ${lock}`);
+                break;
+            }
+          } else {
+            log.push("huh? what? " + ppr(error));
+          }
+        } else {
+          log.push("no error? huh something else happened?");
+        }
+        break;
       }
     }
+    // TODO continue to further targets
+    return log;
   }
-  return tail();
 }
