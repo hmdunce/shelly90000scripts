@@ -6,6 +6,7 @@
 - outside resources allowed
 - 3rd party scripts allowed (?)
 - chat help allowed and BEGGED FOR
+- AI allowed (sue me)
 - all code for my scripts written on stream
   and saved at:
   https://github.com/hmdunce/shelly90000scripts
