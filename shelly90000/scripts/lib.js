@@ -1,5 +1,5 @@
 function (context, args) {
-//@{"hreq":":::TRUST COMMUNICATION::: hardline required - activate with kernel.hardline","mofoDoneGotHacked":""WARNING: BINMAT security shell inactive. Intelligent defense system offline.\n`NLOCK_UNLOCKED`\nConnection terminated."}@
+//@{"hreq":":::TRUST COMMUNICATION::: hardline required - activate with kernel.hardline","mofoDoneGotHacked":"WARNING: BINMAT security shell inactive. Intelligent defense system offline.\n`NLOCK_UNLOCKED`\nConnection terminated."}@
     if (!#G.lib) {
       let scripts_lib = #fs.scripts.lib(),
           cst = JSON.parse(#fs.scripts.quine().split`@`[1]),
