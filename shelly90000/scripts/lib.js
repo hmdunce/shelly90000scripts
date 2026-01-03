@@ -211,7 +211,7 @@ function (context, args) {
             } else {
               return 2
             }
-          }
+          };
       let lib = {
           get,
           notOk,
